@@ -8,3 +8,6 @@ build/
 # SwiftPM
 Package.resolved
 .swiftpm/
+
+# Release 产物
+*.zip
