@@ -1,6 +1,6 @@
 # YierPet 一二桌宠
 
-一只住在你 macOS 桌面上的「一二」宝。它会散步、跳跃、挥手，会提醒你喝水和起身活动，深夜会催你睡觉，你摸鱼它会盯着你，把它甩出去还会气鼓鼓地抗议。
+一只住在你 macOS 桌面上的「一二」宝。它会散步、跳跃、挥手，会提醒你喝水和起身活动，深夜会催你睡觉，你摸鱼它会盯着你，CPU 飙高它会整只烧红，把它甩出去还会气鼓鼓地抗议。
 
 纯 Swift + AppKit 原生实现，**零依赖、零权限、一条命令构建**。
 
@@ -15,6 +15,7 @@
 | 自主行为 | 每 7~15 秒随机散步、跳跃、挥手，碰到屏幕边缘自动掉头 |
 | 气泡说话 | 头顶弹出圆角气泡，文案从语料池随机抽取，淡入淡出 |
 | 健康提醒 | 久坐 / 喝水 / 深夜关怀 / 摸鱼检测，四项独立开关（见下表） |
+| 系统哨兵 | CPU 红温 / 内存压力 / 电量 / 磁盘空间，异常时才冒气泡，五项独立开关（见下表） |
 | 抛掷物理 | 拖住快速甩出，抛物线飞行、撞墙落地反弹；摔狠了会喊「请轻拿轻放一二大王！」 |
 | 零权限 | 不申请辅助功能、不申请屏幕录制，全部使用公开系统 API |
 
@@ -41,6 +42,20 @@
 - 判断「你是否在电脑前」使用系统输入空闲时间（`CGEventSource`），前台 App 检测使用 `NSWorkspace`，**均无需任何权限**
 - 提醒有优先级和 90 秒全局间隔，不会连环轰炸
 - 每项提醒可在右键菜单独立开关，设置自动保存
+
+## 系统哨兵
+
+平时安静不打扰，只在指标异常时才提醒，全部使用原生系统 API（mach / IOKit / FileManager），不起子进程、不要权限：
+
+| 哨兵 | 触发条件 | 一二的反应 |
+| --- | --- | --- |
+| CPU 红温 | 占用持续 90 秒 ≥ 85%（每 10 分钟最多提醒一次） | **整只渐渐烧红** + 惊慌乱跑 +「好烫好烫！CPU 都 97% 了，是谁在偷偷挖矿！」，降下来后自动退烧 |
+| 内存压力 | 系统内存压力达到 critical（事件驱动，非轮询） | 等待动作 +「内存要被挤爆啦，关几个 App 让我喘口气～」 |
+| 电量提醒 | 电量 ≤ 20% 且未插电（降到 10% 再催一次）；台式机无电池自动跳过 | 沮丧趴下 +「肚子饿了……电池只有 18% 了，插电插电！」 |
+| 充满提醒 | 插电且电量 ≥ 98%（每次插电只提醒一次） | 开心挥手 +「吃饱啦～电池充满了，可以拔线啦！」 |
+| 磁盘空间 | 根分区剩余 < 10%（每 6 小时最多提醒一次） | 审阅动作 +「磁盘只剩 9GB 空位啦，该大扫除了！」 |
+
+红温效果说明：CPU 超过 60% 开始渐渐发红，越高越红（红色叠加层按精灵透明通道蒙版，只染身体不染背景），降回 60% 以下自动恢复。
 
 ## 安装运行
 
@@ -82,7 +97,7 @@ open build/YierPet.app
 
 **换形象**：替换 `Sources/YierPet/Resources/spritesheet.webp`。图集契约为 8 列 x 9 行（每格 192 x 208，总图 1536 x 1872），行序：idle、running-right、running-left、waving、jumping、failed、waiting、running、review，未使用格保持透明。各状态帧数与帧时长定义在 [`SpriteSheet.swift`](Sources/YierPet/SpriteSheet.swift)。
 
-**改提醒节奏**：阈值都在 [`ReminderCenter.swift`](Sources/YierPet/ReminderCenter.swift) 顶部（久坐 1h、喝水 30min、摸鱼 30min 等）。
+**改提醒节奏**：阈值都在 [`ReminderCenter.swift`](Sources/YierPet/ReminderCenter.swift) 顶部（久坐 1h、喝水 30min、摸鱼 30min、CPU 85%、磁盘 10% 等）。
 
 ## 项目结构
 
@@ -94,7 +109,8 @@ YierPet/
 │   ├── PetController.swift   # 动画状态机、拖拽、散步、抛掷物理、菜单
 │   ├── SpeechBubble.swift    # 头顶气泡（子窗口，自动跟随）
 │   ├── ActivityMonitor.swift # 输入空闲时间 + 前台 App 检测
-│   ├── ReminderCenter.swift  # 四类健康提醒调度 + 文案语料池
+│   ├── SystemMonitor.swift   # CPU / 内存压力 / 电池 / 磁盘采集（纯原生 API）
+│   ├── ReminderCenter.swift  # 健康提醒 + 系统哨兵调度 + 文案语料池
 │   └── Resources/spritesheet.webp
 ├── docs/                     # README 素材（动图预览、总览图）
 ├── Info.plist                # App 元数据模板
@@ -118,7 +134,7 @@ YierPet/
 
 ## 形象来源
 
-宠物形象由一张静态图经 ChatGPT 生成 9 行动画帧总表，再用本仓库配套流水线切分、镜像、校验、合成为精灵图集（基于 [openai/skills](https://github.com/openai/skills) 的 hatch-pet 图集契约）。
+宠物形象由黄小B创作，取一张静态图经 ChatGPT 生成 9 行动画帧总表，再用本仓库配套流水线切分、镜像、校验、合成为精灵图集（基于 [openai/skills](https://github.com/openai/skills) 的 hatch-pet 图集契约）。
 
 ## 许可证
 

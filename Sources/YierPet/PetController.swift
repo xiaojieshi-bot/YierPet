@@ -9,9 +9,23 @@ final class PetView: NSView {
     var menuProvider: (() -> NSMenu)?
 
     private let spriteLayer = CALayer()
+    /// Red overlay masked by the sprite alpha — the "CPU red-hot" effect.
+    private let heatLayer = CALayer()
+    private let heatMask = CALayer()
     private var dragged = false
     /// Recent drag deltas used to estimate throw velocity.
     private var dragSamples: [(t: CFTimeInterval, dx: CGFloat, dy: CGFloat)] = []
+
+    /// 0 = normal, 1 = fully red-hot.
+    var heatLevel: CGFloat = 0 {
+        didSet {
+            let clamped = min(max(heatLevel, 0), 1)
+            CATransaction.begin()
+            CATransaction.setAnimationDuration(0.8)
+            heatLayer.opacity = Float(clamped * 0.5)
+            CATransaction.commit()
+        }
+    }
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -22,6 +36,15 @@ final class PetView: NSView {
         spriteLayer.frame = bounds
         spriteLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
         layer?.addSublayer(spriteLayer)
+
+        heatLayer.backgroundColor = NSColor.systemRed.cgColor
+        heatLayer.frame = bounds
+        heatLayer.autoresizingMask = [.layerWidthSizable, .layerHeightSizable]
+        heatLayer.opacity = 0
+        heatMask.contentsGravity = .resizeAspect
+        heatMask.frame = bounds
+        heatLayer.mask = heatMask
+        layer?.addSublayer(heatLayer)
     }
 
     required init?(coder: NSCoder) { fatalError("unused") }
@@ -30,6 +53,7 @@ final class PetView: NSView {
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         spriteLayer.contents = frame
+        heatMask.contents = frame
         CATransaction.commit()
     }
 
@@ -421,7 +445,7 @@ final class PetController: NSObject {
 
         // Reminder toggles
         let reminderMenu = NSMenu()
-        for kind in ReminderKind.allCases {
+        for kind in ReminderKind.healthCases {
             let item = NSMenuItem(
                 title: kind.title,
                 action: #selector(menuToggleReminder(_:)),
@@ -436,6 +460,24 @@ final class PetController: NSObject {
             title: "提醒设置", action: nil, keyEquivalent: "")
         menu.addItem(reminderItem)
         menu.setSubmenu(reminderMenu, for: reminderItem)
+
+        // System sentinel toggles
+        let sentinelMenu = NSMenu()
+        for kind in ReminderKind.systemCases {
+            let item = NSMenuItem(
+                title: kind.title,
+                action: #selector(menuToggleReminder(_:)),
+                keyEquivalent: ""
+            )
+            item.target = self
+            item.representedObject = kind.rawValue
+            item.state = reminderCenter.isEnabled(kind) ? .on : .off
+            sentinelMenu.addItem(item)
+        }
+        let sentinelItem = NSMenuItem(
+            title: "系统哨兵", action: nil, keyEquivalent: "")
+        menu.addItem(sentinelItem)
+        menu.setSubmenu(sentinelMenu, for: sentinelItem)
 
         // Hidden test menu: hold Option while right-clicking
         if NSEvent.modifierFlags.contains(.option) {
@@ -522,7 +564,23 @@ extension PetController: ReminderCenterDelegate {
             playOnce(.review, loops: 3)
         case .slacking:
             playOnce(.review, loops: 5)
+        case .cpuHigh:
+            // Panic run + make sure the red tint shows (test menu included).
+            view.heatLevel = max(view.heatLevel, 0.9)
+            playOnce(.running, loops: 3)
+        case .memoryPressure:
+            playOnce(.waiting, loops: 3)
+        case .batteryLow:
+            playOnce(.failed, loops: 2)
+        case .batteryFull:
+            playOnce(.waving, loops: 2)
+        case .diskFull:
+            playOnce(.review, loops: 3)
         }
+    }
+
+    func reminderCenter(_ center: ReminderCenter, heatChanged level: Double) {
+        view.heatLevel = CGFloat(level)
     }
 
     func reminderCenter(_ center: ReminderCenter, sleepyChanged sleepy: Bool) {
