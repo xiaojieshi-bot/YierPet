@@ -1,0 +1,125 @@
+{
+  "pack": "duo",
+  "stickers": [
+    {
+      "id": "s13_baobao",
+      "fps": 8,
+      "frames": 10,
+      "tags": [
+        "love"
+      ]
+    },
+    {
+      "id": "s30_qitou-bixin",
+      "fps": 8,
+      "frames": 9,
+      "tags": [
+        "love"
+      ]
+    },
+    {
+      "id": "s31_loutang",
+      "fps": 8,
+      "frames": 8,
+      "tags": [
+        "sleep"
+      ]
+    },
+    {
+      "id": "s32_qibei",
+      "fps": 8,
+      "frames": 17,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s33_tilan-sanbu",
+      "fps": 8,
+      "frames": 12,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s34_qinqin",
+      "fps": 8,
+      "frames": 8,
+      "tags": [
+        "love"
+      ]
+    },
+    {
+      "id": "s35_bingjian",
+      "fps": 8,
+      "frames": 11,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s36_zipai",
+      "fps": 8,
+      "frames": 9,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s37_dieluohan",
+      "fps": 8,
+      "frames": 8,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s38_diandongche",
+      "fps": 8,
+      "frames": 9,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s39_tangzhe-shuaji",
+      "fps": 8,
+      "frames": 20,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s40_mianduimian",
+      "fps": 8,
+      "frames": 12,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s41_hongshui",
+      "fps": 8,
+      "frames": 9,
+      "tags": [
+        "sleep"
+      ]
+    },
+    {
+      "id": "s48_beihoubao",
+      "fps": 8,
+      "frames": 16,
+      "tags": [
+        "love"
+      ]
+    },
+    {
+      "id": "s55_linlanzi",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "idle"
+      ]
+    }
+  ]
+}

@@ -112,6 +112,14 @@ final class PetController: NSObject {
     private var frameIndex = 0
     private var frameTimer: Timer?
 
+    // Sticker (表情包) styles
+    private var style: PetStyle = .classic
+    private var packLibrary: PackLibrary?
+    private var stickerFrames: [CGImage] = []
+    private var stickerFPS: Double = 8
+    /// 0 = loop forever (idle), >0 = one-shot action loops left.
+    private var stickerLoopsRemaining = 0
+
     /// One-shot actions return to idle after N loops.
     private var loopsRemaining = 0
     private var behaviorTimer: Timer?
@@ -163,14 +171,14 @@ final class PetController: NSObject {
 
         view.onDrag = { [weak self] dx in self?.handleDrag(dx: dx) }
         view.onDragEnd = { [weak self] v in self?.handleDragEnd(velocity: v) }
-        view.onClick = { [weak self] in self?.playOnce(.waving) }
+        view.onClick = { [weak self] in self?.handleClick() }
         view.menuProvider = { [weak self] in self?.buildMenu() ?? NSMenu() }
 
         window.orderFrontRegardless()
         bubble = SpeechBubble(parent: window)
         reminderCenter.delegate = self
         reminderCenter.start()
-        setState(.idle)
+        applyStyle(PetStyle.saved)
         scheduleRandomBehavior()
     }
 
@@ -179,9 +187,18 @@ final class PetController: NSObject {
         bubble?.say(text, duration: duration)
     }
 
+    private func handleClick() {
+        if style.isSticker {
+            playStickerTags(["happy", "love"], loops: 1)
+        } else {
+            playOnce(.waving)
+        }
+    }
+
     // MARK: - Animation playback
 
     private func setState(_ newState: PetState, loops: Int = 0) {
+        guard !style.isSticker else { return }
         state = newState
         frameIndex = 0
         loopsRemaining = loops
@@ -218,11 +235,86 @@ final class PetController: NSObject {
         setState(action, loops: loops)
     }
 
+    // MARK: - Sticker playback (表情包模式)
+
+    /// Switch appearance; sticker styles play frame sequences from a pack.
+    private func applyStyle(_ newStyle: PetStyle) {
+        stopWalk()
+        stopThrow()
+        frameTimer?.invalidate()
+        stickerFrames = []
+        if newStyle.isSticker, let lib = PackLibrary(style: newStyle) {
+            style = newStyle
+            packLibrary = lib
+            stickerIdle()
+        } else {
+            style = .classic
+            packLibrary = nil
+            setState(.idle)
+        }
+        PetStyle.saved = style
+    }
+
+    /// Loop a random relaxed sticker; rotation happens via random behavior.
+    private func stickerIdle() {
+        guard let lib = packLibrary,
+              let sticker = lib.randomSticker(anyOf: ["idle", "lazy", "happy"])
+        else { return }
+        playSticker(sticker, loops: 0)
+    }
+
+    /// Play a random sticker matching the first tag that has candidates.
+    private func playStickerTags(_ tags: [String], loops: Int) {
+        guard let lib = packLibrary,
+              let sticker = lib.randomSticker(anyOf: tags) else { return }
+        playSticker(sticker, loops: loops)
+    }
+
+    private func playSticker(_ sticker: Sticker, loops: Int) {
+        let frames = sticker.loadFrames()
+        guard !frames.isEmpty else { return }
+        stickerFrames = frames
+        stickerFPS = sticker.fps
+        stickerLoopsRemaining = loops
+        frameIndex = 0
+        stepStickerFrame()
+    }
+
+    private func stepStickerFrame() {
+        frameTimer?.invalidate()
+        guard !stickerFrames.isEmpty else { return }
+        if frameIndex >= stickerFrames.count {
+            frameIndex = 0
+            if stickerLoopsRemaining > 0 {
+                stickerLoopsRemaining -= 1
+                if stickerLoopsRemaining == 0 {
+                    stickerIdle()
+                    return
+                }
+            }
+        }
+        view.show(frame: stickerFrames[frameIndex])
+        frameIndex += 1
+        var interval = 1.0 / stickerFPS
+        if sleepy && stickerLoopsRemaining == 0 { interval *= 2 } // drowsy
+        frameTimer = Timer.scheduledTimer(
+            withTimeInterval: interval, repeats: false
+        ) { [weak self] _ in
+            self?.stepStickerFrame()
+        }
+    }
+
+    /// True while a one-shot sticker action is playing.
+    private var stickerBusy: Bool {
+        style.isSticker && stickerLoopsRemaining > 0
+    }
+
     // MARK: - Dragging
 
     private func handleDrag(dx: CGFloat) {
         stopWalk()
         stopThrow()
+        guard !style.isSticker else { return } // sticker keeps playing
         let target: PetState = dx >= 0 ? .runningRight : .runningLeft
         if state != target {
             setState(target)
@@ -233,6 +325,8 @@ final class PetController: NSObject {
         let speed = hypot(velocity.dx, velocity.dy)
         if speed > Self.throwSpeedThreshold {
             startThrow(velocity: velocity)
+        } else if style.isSticker {
+            playStickerTags(["happy", "love"], loops: 1)
         } else {
             setState(.jumping, loops: 1)
         }
@@ -242,7 +336,7 @@ final class PetController: NSObject {
 
     private func startThrow(velocity: CGVector) {
         stopWalk()
-        frameTimer?.invalidate()
+        if !style.isSticker { frameTimer?.invalidate() }
         isThrowing = true
         throwVelocity = velocity
         maxImpactSpeed = 0
@@ -294,14 +388,17 @@ final class PetController: NSObject {
 
         window.setFrameOrigin(origin)
 
-        // Airborne frames: jumping row (1 = rising, 3 = falling, 2 = apex)
-        let frames = sheet.frames(for: .jumping)
-        if frames.count >= 5 {
-            let idx: Int
-            if throwVelocity.dy > 80 { idx = 1 }
-            else if throwVelocity.dy < -80 { idx = 3 }
-            else { idx = 2 }
-            view.show(frame: frames[idx])
+        // Airborne frames: jumping row (1 = rising, 3 = falling, 2 = apex).
+        // Sticker styles keep playing their own frames mid-air.
+        if !style.isSticker {
+            let frames = sheet.frames(for: .jumping)
+            if frames.count >= 5 {
+                let idx: Int
+                if throwVelocity.dy > 80 { idx = 1 }
+                else if throwVelocity.dy < -80 { idx = 3 }
+                else { idx = 2 }
+                view.show(frame: frames[idx])
+            }
         }
 
         if landed { finishThrow() }
@@ -311,7 +408,13 @@ final class PetController: NSObject {
         stopThrow()
         if maxImpactSpeed > 1600 {
             say("请轻拿轻放一二大王！", duration: 3)
-            setState(.failed, loops: 1)
+            if style.isSticker {
+                playStickerTags(["angry", "sad"], loops: 2)
+            } else {
+                setState(.failed, loops: 1)
+            }
+        } else if style.isSticker {
+            playStickerTags(["happy"], loops: 1)
         } else {
             setState(.jumping, loops: 1)
         }
@@ -337,7 +440,17 @@ final class PetController: NSObject {
     }
 
     private func performRandomBehavior() {
-        guard randomBehaviorEnabled, state == .idle, !isThrowing else { return }
+        guard randomBehaviorEnabled, !isThrowing else { return }
+        if style.isSticker {
+            guard !stickerBusy else { return }
+            switch Int.random(in: 0..<10) {
+            case 0...2: startWalk()
+            case 3...6: stickerIdle() // rotate to another relaxed sticker
+            default: break
+            }
+            return
+        }
+        guard state == .idle else { return }
         let dice = Int.random(in: 0..<10)
         switch dice {
         case 0...3: startWalk()
@@ -419,21 +532,42 @@ final class PetController: NSObject {
 
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
-        let stateMenu = NSMenu()
-        for petState in PetState.allCases {
+
+        // Appearance switcher
+        let styleMenu = NSMenu()
+        for petStyle in PetStyle.allCases {
             let item = NSMenuItem(
-                title: petState.displayName,
-                action: #selector(menuSelectState(_:)),
+                title: petStyle.displayName,
+                action: #selector(menuSelectStyle(_:)),
                 keyEquivalent: ""
             )
             item.target = self
-            item.representedObject = petState.rawValue
-            item.state = petState == state ? .on : .off
-            stateMenu.addItem(item)
+            item.representedObject = petStyle.rawValue
+            item.state = petStyle == style ? .on : .off
+            styleMenu.addItem(item)
         }
-        let stateItem = NSMenuItem(title: "动作", action: nil, keyEquivalent: "")
-        menu.addItem(stateItem)
-        menu.setSubmenu(stateMenu, for: stateItem)
+        let styleItem = NSMenuItem(title: "形象", action: nil, keyEquivalent: "")
+        menu.addItem(styleItem)
+        menu.setSubmenu(styleMenu, for: styleItem)
+
+        // Manual actions only make sense for the atlas-based classic style
+        if !style.isSticker {
+            let stateMenu = NSMenu()
+            for petState in PetState.allCases {
+                let item = NSMenuItem(
+                    title: petState.displayName,
+                    action: #selector(menuSelectState(_:)),
+                    keyEquivalent: ""
+                )
+                item.target = self
+                item.representedObject = petState.rawValue
+                item.state = petState == state ? .on : .off
+                stateMenu.addItem(item)
+            }
+            let stateItem = NSMenuItem(title: "动作", action: nil, keyEquivalent: "")
+            menu.addItem(stateItem)
+            menu.setSubmenu(stateMenu, for: stateItem)
+        }
 
         let randomItem = NSMenuItem(
             title: randomBehaviorEnabled ? "暂停随机行为" : "开启随机行为",
@@ -507,6 +641,13 @@ final class PetController: NSObject {
         return menu
     }
 
+    @objc private func menuSelectStyle(_ sender: NSMenuItem) {
+        guard let raw = sender.representedObject as? String,
+              let newStyle = PetStyle(rawValue: raw),
+              newStyle != style else { return }
+        applyStyle(newStyle)
+    }
+
     @objc private func menuSelectState(_ sender: NSMenuItem) {
         guard let raw = sender.representedObject as? String,
               let petState = PetState(rawValue: raw) else { return }
@@ -548,6 +689,31 @@ extension PetController: ReminderCenterDelegate {
         guard !isThrowing else { return }
         stopWalk()
         say(message, duration: 6)
+
+        if style.isSticker {
+            // Emotion-matched sticker reactions (with tag fallback).
+            switch kind {
+            case .sedentary, .slacking:
+                playStickerTags(["exercise", "idle"], loops: 3)
+            case .water:
+                playStickerTags(["eat", "idle"], loops: 3)
+            case .lateNight:
+                playStickerTags(["sleep", "lazy"], loops: 3)
+            case .cpuHigh:
+                view.heatLevel = max(view.heatLevel, 0.9)
+                playStickerTags(["hot", "angry", "tired"], loops: 3)
+            case .memoryPressure:
+                playStickerTags(["tired", "sad"], loops: 3)
+            case .batteryLow:
+                playStickerTags(["eat", "sad"], loops: 2)
+            case .batteryFull:
+                playStickerTags(["happy"], loops: 2)
+            case .diskFull:
+                playStickerTags(["work", "tired"], loops: 3)
+            }
+            return
+        }
+
         switch kind {
         case .sedentary:
             // Walk to the bottom-center of the screen, then jump to block you.

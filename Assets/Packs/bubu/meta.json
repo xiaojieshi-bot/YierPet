@@ -1,0 +1,125 @@
+{
+  "pack": "bubu",
+  "stickers": [
+    {
+      "id": "s03_liuhan",
+      "fps": 8,
+      "frames": 23,
+      "tags": [
+        "tired"
+      ]
+    },
+    {
+      "id": "s05_chilingshi",
+      "fps": 8,
+      "frames": 21,
+      "tags": [
+        "eat"
+      ]
+    },
+    {
+      "id": "s06_shenlanyao",
+      "fps": 8,
+      "frames": 22,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s10_zuozhe",
+      "fps": 8,
+      "frames": 15,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s12_tiaosheng",
+      "fps": 8,
+      "frames": 17,
+      "tags": [
+        "exercise"
+      ]
+    },
+    {
+      "id": "s20_haolei",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "tired"
+      ]
+    },
+    {
+      "id": "s22_xingli",
+      "fps": 8,
+      "frames": 17,
+      "tags": [
+        "tired"
+      ]
+    },
+    {
+      "id": "s25_wanjuche",
+      "fps": 8,
+      "frames": 19,
+      "tags": [
+        "sad"
+      ]
+    },
+    {
+      "id": "s27_wanshouji",
+      "fps": 8,
+      "frames": 13,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s29_weiqu",
+      "fps": 8,
+      "frames": 16,
+      "tags": [
+        "sad"
+      ]
+    },
+    {
+      "id": "s42_sahua",
+      "fps": 8,
+      "frames": 31,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s43_daku",
+      "fps": 8,
+      "frames": 26,
+      "tags": [
+        "sad"
+      ]
+    },
+    {
+      "id": "s49_hekafei",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "work"
+      ]
+    },
+    {
+      "id": "s52_zhanli",
+      "fps": 8,
+      "frames": 19,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s53_shouji",
+      "fps": 8,
+      "frames": 27,
+      "tags": [
+        "lazy"
+      ]
+    }
+  ]
+}

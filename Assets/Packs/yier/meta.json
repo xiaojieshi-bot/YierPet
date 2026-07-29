@@ -1,0 +1,214 @@
+{
+  "pack": "yier",
+  "stickers": [
+    {
+      "id": "s00_fenpu",
+      "fps": 8,
+      "frames": 22,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s01_shengqi",
+      "fps": 8,
+      "frames": 21,
+      "tags": [
+        "angry"
+      ]
+    },
+    {
+      "id": "s02_tiaowu",
+      "fps": 8,
+      "frames": 27,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s04_xianyu",
+      "fps": 8,
+      "frames": 31,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s07_chifan",
+      "fps": 8,
+      "frames": 20,
+      "tags": [
+        "eat"
+      ]
+    },
+    {
+      "id": "s08_baozhentou",
+      "fps": 8,
+      "frames": 20,
+      "tags": [
+        "sleep"
+      ]
+    },
+    {
+      "id": "s09_zuozhe",
+      "fps": 8,
+      "frames": 14,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s11_tiaosheng",
+      "fps": 8,
+      "frames": 16,
+      "tags": [
+        "exercise"
+      ]
+    },
+    {
+      "id": "s14_fadai",
+      "fps": 8,
+      "frames": 30,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s15_kaodian",
+      "fps": 8,
+      "frames": 41,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s16_qima",
+      "fps": 8,
+      "frames": 23,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s17_qiche",
+      "fps": 8,
+      "frames": 16,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s18_huabanche",
+      "fps": 8,
+      "frames": 9,
+      "tags": [
+        "happy"
+      ]
+    },
+    {
+      "id": "s19_haolei",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "tired"
+      ]
+    },
+    {
+      "id": "s21_xingli",
+      "fps": 8,
+      "frames": 19,
+      "tags": [
+        "tired"
+      ]
+    },
+    {
+      "id": "s23_shengqi2",
+      "fps": 8,
+      "frames": 2,
+      "tags": [
+        "angry"
+      ]
+    },
+    {
+      "id": "s24_wanjuche",
+      "fps": 8,
+      "frames": 19,
+      "tags": [
+        "sad"
+      ]
+    },
+    {
+      "id": "s26_wanshouji",
+      "fps": 8,
+      "frames": 13,
+      "tags": [
+        "lazy"
+      ]
+    },
+    {
+      "id": "s28_fenpu2",
+      "fps": 8,
+      "frames": 17,
+      "tags": [
+        "idle"
+      ]
+    },
+    {
+      "id": "s44_maohuo",
+      "fps": 8,
+      "frames": 21,
+      "tags": [
+        "angry"
+      ]
+    },
+    {
+      "id": "s45_baonu",
+      "fps": 8,
+      "frames": 14,
+      "tags": [
+        "angry"
+      ]
+    },
+    {
+      "id": "s46_zhaohuo",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "hot",
+        "angry"
+      ]
+    },
+    {
+      "id": "s47_bixin",
+      "fps": 8,
+      "frames": 28,
+      "tags": [
+        "love"
+      ]
+    },
+    {
+      "id": "s50_dadianna",
+      "fps": 8,
+      "frames": 18,
+      "tags": [
+        "work"
+      ]
+    },
+    {
+      "id": "s51_aoaoku",
+      "fps": 8,
+      "frames": 24,
+      "tags": [
+        "sad"
+      ]
+    },
+    {
+      "id": "s54_huangwaitao",
+      "fps": 8,
+      "frames": 12,
+      "tags": [
+        "idle"
+      ]
+    }
+  ]
+}
