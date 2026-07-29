@@ -10,9 +10,9 @@ enum PetStyle: String, CaseIterable {
     var displayName: String {
         switch self {
         case .classic: return "经典一二"
-        case .yier: return "一二表情包"
-        case .bubu: return "布布表情包"
-        case .duo: return "一二布布合体"
+        case .yier: return "活力一二"
+        case .bubu: return "活力布布"
+        case .duo: return "一二布布"
         }
     }
 
