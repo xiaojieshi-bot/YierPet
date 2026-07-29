@@ -2,14 +2,6 @@
   "pack": "yier",
   "stickers": [
     {
-      "id": "s00_fenpu",
-      "fps": 8,
-      "frames": 22,
-      "tags": [
-        "idle"
-      ]
-    },
-    {
       "id": "s01_shengqi",
       "fps": 8,
       "frames": 21,
@@ -200,14 +192,6 @@
       "frames": 24,
       "tags": [
         "sad"
-      ]
-    },
-    {
-      "id": "s54_huangwaitao",
-      "fps": 8,
-      "frames": 12,
-      "tags": [
-        "idle"
       ]
     }
   ]
