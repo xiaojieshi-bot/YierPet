@@ -63,7 +63,7 @@ final class SpeechBubble {
     private static let padding: CGFloat = 10
     /// The sprite cell has transparent headroom above the character,
     /// so the bubble overlaps the pet window top to sit near the head.
-    private static let overlapIntoPet: CGFloat = 34
+    private static let overlapIntoPet: CGFloat = 98
 
     init(parent: NSWindow) {
         parentWindow = parent
