@@ -11,6 +11,12 @@ enum ReminderKind: String, CaseIterable {
     case batteryLow
     case batteryFull
     case diskFull
+    // Companion mode（陪伴模式）
+    case morningGreet
+    case lunchTime
+    case afternoonCoffee
+    case fridayEvening
+    case ideOvertime
 
     var title: String {
         switch self {
@@ -23,6 +29,11 @@ enum ReminderKind: String, CaseIterable {
         case .batteryLow: return "电量提醒"
         case .batteryFull: return "充满提醒"
         case .diskFull: return "磁盘空间"
+        case .morningGreet: return "早晨问候"
+        case .lunchTime: return "午饭提醒"
+        case .afternoonCoffee: return "下午咖啡"
+        case .fridayEvening: return "周五撒欢"
+        case .ideOvertime: return "编码久战"
         }
     }
 
@@ -35,8 +46,24 @@ enum ReminderKind: String, CaseIterable {
         }
     }
 
-    static var healthCases: [ReminderKind] { allCases.filter { !$0.isSystem } }
+    /// 陪伴模式提醒（时间节律 + 编码久战）。
+    var isCompanion: Bool {
+        switch self {
+        case .morningGreet, .lunchTime, .afternoonCoffee, .fridayEvening,
+            .ideOvertime:
+            return true
+        default:
+            return false
+        }
+    }
+
+    static var healthCases: [ReminderKind] {
+        allCases.filter { !$0.isSystem && !$0.isCompanion }
+    }
     static var systemCases: [ReminderKind] { allCases.filter { $0.isSystem } }
+    static var companionCases: [ReminderKind] {
+        allCases.filter { $0.isCompanion }
+    }
 
     var defaultsKey: String { "reminder.\(rawValue).enabled" }
 }
@@ -92,6 +119,11 @@ final class ReminderCenter {
     private var batteryStage = 0            // 0 none, 1 fired ≤20%, 2 fired ≤10%
     private var pendingBatteryStage = 0
     private var batteryFullFired = false
+    /// Companion mode state
+    private var firedToday: Set<ReminderKind> = []
+    private var lastResetDay = Calendar.current.component(.day, from: Date())
+    private var ideWorkSeconds: TimeInterval = 0
+    private var fridayFiredWeek = 0    // 周五撒欢每周一次（weekOfYear）
     /// Live values substituted into "{v}" placeholders.
     private var pendingDetail: [ReminderKind: String] = [:]
 
@@ -113,6 +145,9 @@ final class ReminderCenter {
             "夜深了，工作再多也要爱惜自己哦",
             "我都困了 zzZ……你也快睡吧？",
             "熬夜会秃的！明天再做也来得及～",
+            "夜深了，有我陪你呀，但也别熬太晚哦～",
+            "再忙也有我在身边，加油之余记得休息～",
+            "夜里静悄悄的，有我陪着你，忙完就去睡吧～",
         ],
         .slacking: [
             "都摸鱼半小时了哦……我可什么都没看见",
@@ -144,6 +179,35 @@ final class ReminderCenter {
             "磁盘只剩 {v} 空位啦，该大扫除了！",
             "装不下啦……磁盘剩 {v}，删点东西嘛",
         ],
+        .morningGreet: [
+            "早上好呀！今天也要元气满满哦～",
+            "新的一天开始啦，冲鸭冲鸭！",
+            "早安早安～今天想做点什么呀？",
+            "太阳晒屁股啦，今天也请多指教！",
+        ],
+        .lunchTime: [
+            "咕咕咕～到饭点啦，去吃点好的！",
+            "十二点啦！干饭人干饭魂，走起走起～",
+            "肚子是不是咕咕叫啦？该吃午饭咯！",
+            "再忙也要好好吃饭呀，午饭时间到！",
+        ],
+        .afternoonCoffee: [
+            "下午三点啦，来杯咖啡提提神？",
+            "下午茶时间到～来点咖啡或小点心嘛！",
+            "有点困了吧？喝口咖啡满血复活！",
+        ],
+        .fridayEvening: [
+            "周五啦！晚上要不要犒劳一下自己～",
+            "耶！周五晚上到咯，尽情撒欢吧！",
+            "辛苦一周啦，今晚好好放松一下嘛～",
+            "周末近在眼前，先嗨一个再说！",
+        ],
+        .ideOvertime: [
+            "代码写两个小时啦，起来伸个懒腰嘛！",
+            "敲了好久键盘啦，让眼睛休息一下下～",
+            "连续奋战两小时！起来走走喝口水吧？",
+            "卷了两个钟头啦……劳逸结合才高效哦！",
+        ],
     ]
 
     /// Fallback values for "{v}" when fired from the test menu.
@@ -152,6 +216,9 @@ final class ReminderCenter {
         .batteryLow: "18%",
         .diskFull: "9GB",
     ]
+
+    /// Sticker tags implied by the frontmost app, for context-aware idling.
+    var frontEmotionTags: [String] { monitor.frontCategory?.emotionTags ?? [] }
 
     func isEnabled(_ kind: ReminderKind) -> Bool {
         let defaults = UserDefaults.standard
@@ -194,6 +261,13 @@ final class ReminderCenter {
         case .batteryLow: batteryStage = max(batteryStage, pendingBatteryStage)
         case .batteryFull: batteryFullFired = true
         case .diskFull: lastDiskFire = Date()
+        case .morningGreet, .lunchTime, .afternoonCoffee:
+            firedToday.insert(kind)
+        case .fridayEvening:
+            fridayFiredWeek = Calendar.current.component(
+                .weekOfYear, from: Date())
+        case .ideOvertime:
+            ideWorkSeconds = 0
         }
         lastAnyFire = Date()
         var message = Self.messages[kind]?.randomElement() ?? ""
@@ -212,6 +286,13 @@ final class ReminderCenter {
     }
 
     private func tickNow() {
+        // 跨天清空「今日已触发」记录
+        let today = Calendar.current.component(.day, from: Date())
+        if today != lastResetDay {
+            firedToday.removeAll()
+            lastResetDay = today
+        }
+
         let idle = ActivityMonitor.idleSeconds()
         let present = idle < presenceIdleLimit
 
@@ -222,6 +303,14 @@ final class ReminderCenter {
             // User walked away: sitting streak is broken.
             activeSeconds = 0
         }
+
+        // IDE / 终端连续编码时长：人在且前台是编码类才累加；
+        // 离开即断；前台切到其他 App 时仅不累加、不清零。
+        if present,
+            monitor.frontCategory == .ide || monitor.frontCategory == .terminal {
+            ideWorkSeconds += tick
+        }
+        if !present { ideWorkSeconds = 0 }
 
         updateSleepy()
 
@@ -246,6 +335,31 @@ final class ReminderCenter {
         if isEnabled(.slacking), monitor.slackingSeconds >= slackLimit,
             Date().timeIntervalSince(lastSlackFire) >= slackRepeat {
             candidates.append(.slacking)
+        }
+
+        // 陪伴模式：时间节律候选，优先级低于所有健康提醒
+        let now = Date()
+        let hour = Calendar.current.component(.hour, from: now)
+        let weekday = Calendar.current.component(.weekday, from: now)
+        let weekOfYear = Calendar.current.component(.weekOfYear, from: now)
+        if isEnabled(.morningGreet), present, (6...10).contains(hour),
+            !firedToday.contains(.morningGreet) {
+            candidates.append(.morningGreet)
+        }
+        if isEnabled(.lunchTime), present, hour == 12,
+            !firedToday.contains(.lunchTime) {
+            candidates.append(.lunchTime)
+        }
+        if isEnabled(.afternoonCoffee), present, hour == 15,
+            !firedToday.contains(.afternoonCoffee) {
+            candidates.append(.afternoonCoffee)
+        }
+        if isEnabled(.fridayEvening), present, weekday == 6,
+            (17...19).contains(hour), fridayFiredWeek != weekOfYear {
+            candidates.append(.fridayEvening)
+        }
+        if isEnabled(.ideOvertime), ideWorkSeconds >= 2 * 3600 {
+            candidates.append(.ideOvertime)
         }
 
         if let kind = candidates.first {

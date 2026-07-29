@@ -132,6 +132,45 @@ final class PetController: NSObject {
     private let reminderCenter = ReminderCenter()
     private var sleepy = false
 
+    // Mood system（惰性求值，不新增定时器）
+    private enum Mood { case normal, angry, happy, love, sad }
+    private var moodRaw: Mood = .normal
+    private var moodSetAt = Date.distantPast
+    private var lastInteraction = Date()
+    private var wasAway = false
+
+    /// 读取时判断过期：angry 180s、happy 300s、love 600s 回 normal；
+    /// sad 不自动过期（直到互动）。
+    private var currentMood: Mood {
+        let age = Date().timeIntervalSince(moodSetAt)
+        switch moodRaw {
+        case .angry where age > 180, .happy where age > 300,
+            .love where age > 600:
+            moodRaw = .normal
+            return .normal
+        default:
+            return moodRaw
+        }
+    }
+
+    private func setMood(_ m: Mood) {
+        moodRaw = m
+        moodSetAt = Date()
+    }
+
+    /// 当前情境下适合待机播放的表情标签。
+    private var contextTags: [String] {
+        switch currentMood {
+        case .angry: return ["angry", "sad"]
+        case .sad: return ["sad"]
+        case .love: return ["love", "happy"]
+        case .happy: return ["happy"]
+        case .normal:
+            let tags = reminderCenter.frontEmotionTags
+            return tags.isEmpty ? ["idle", "lazy", "happy"] : tags
+        }
+    }
+
     // Throw physics
     private var physicsTimer: Timer?
     private var throwVelocity = CGVector.zero
@@ -188,10 +227,32 @@ final class PetController: NSObject {
     }
 
     private func handleClick() {
-        if style.isSticker {
-            playStickerTags(["happy", "love"], loops: 1)
-        } else {
-            playOnce(.waving)
+        lastInteraction = Date()
+        switch currentMood {
+        case .angry:
+            // 还在气头上：抱怨一下
+            if style.isSticker {
+                playStickerTags(["angry"], loops: 1)
+            } else {
+                playOnce(.failed)
+            }
+            say("哼！还在生气呢！", duration: 4)
+        case .sad:
+            // 被冷落后终于被理睬
+            setMood(.happy)
+            say("你终于来陪我啦！", duration: 4)
+            if style.isSticker {
+                playStickerTags(["happy", "love"], loops: 1)
+            } else {
+                playOnce(.waving)
+            }
+        default:
+            setMood(.happy)
+            if style.isSticker {
+                playStickerTags(["happy", "love"], loops: 1)
+            } else {
+                playOnce(.waving)
+            }
         }
     }
 
@@ -258,7 +319,7 @@ final class PetController: NSObject {
     /// Loop a random relaxed sticker; rotation happens via random behavior.
     private func stickerIdle() {
         guard let lib = packLibrary,
-              let sticker = lib.randomSticker(anyOf: ["idle", "lazy", "happy"])
+              let sticker = lib.randomSticker(anyOf: contextTags)
         else { return }
         playSticker(sticker, loops: 0)
     }
@@ -326,8 +387,10 @@ final class PetController: NSObject {
         if speed > Self.throwSpeedThreshold {
             startThrow(velocity: velocity)
         } else if style.isSticker {
+            lastInteraction = Date()
             playStickerTags(["happy", "love"], loops: 1)
         } else {
+            lastInteraction = Date()
             setState(.jumping, loops: 1)
         }
     }
@@ -407,6 +470,9 @@ final class PetController: NSObject {
     private func finishThrow() {
         stopThrow()
         if maxImpactSpeed > 1600 {
+            // 重摔：生气！
+            setMood(.angry)
+            say("请轻拿轻放！", duration: 4)
             if style.isSticker {
                 playStickerTags(["angry", "sad"], loops: 2)
             } else {
@@ -440,6 +506,27 @@ final class PetController: NSObject {
 
     private func performRandomBehavior() {
         guard randomBehaviorEnabled, !isThrowing else { return }
+
+        // 回归 / 冷落检测
+        let idle = ActivityMonitor.idleSeconds()
+        if idle >= 30 * 60 {
+            wasAway = true
+            return  // 人不在，不做行为
+        }
+        if wasAway {
+            wasAway = false
+            lastInteraction = Date()
+            if style.isSticker, !stickerBusy {
+                playStickerTags(["love", "happy"], loops: 2)
+                say("你回来啦！我好想你呀～", duration: 4)
+                return
+            }
+        }
+        if Date().timeIntervalSince(lastInteraction) >= 30 * 60,
+            currentMood == .normal {
+            setMood(.sad)  // 被冷落太久，偷偷难过
+        }
+
         if style.isSticker {
             guard !stickerBusy else { return }
             switch Int.random(in: 0..<10) {
@@ -612,6 +699,24 @@ final class PetController: NSObject {
         menu.addItem(sentinelItem)
         menu.setSubmenu(sentinelMenu, for: sentinelItem)
 
+        // Companion mode toggles
+        let companionMenu = NSMenu()
+        for kind in ReminderKind.companionCases {
+            let item = NSMenuItem(
+                title: kind.title,
+                action: #selector(menuToggleReminder(_:)),
+                keyEquivalent: ""
+            )
+            item.target = self
+            item.representedObject = kind.rawValue
+            item.state = reminderCenter.isEnabled(kind) ? .on : .off
+            companionMenu.addItem(item)
+        }
+        let companionItem = NSMenuItem(
+            title: "陪伴模式", action: nil, keyEquivalent: "")
+        menu.addItem(companionItem)
+        menu.setSubmenu(companionMenu, for: companionItem)
+
         // Hidden test menu: hold Option while right-clicking
         if NSEvent.modifierFlags.contains(.option) {
             let testMenu = NSMenu()
@@ -697,7 +802,7 @@ extension PetController: ReminderCenterDelegate {
             case .water:
                 playStickerTags(["eat", "idle"], loops: 3)
             case .lateNight:
-                playStickerTags(["sleep", "lazy"], loops: 3)
+                playStickerTags(["love", "sleep", "lazy"], loops: 3)
             case .cpuHigh:
                 view.heatLevel = max(view.heatLevel, 0.9)
                 playStickerTags(["hot", "angry", "tired"], loops: 3)
@@ -709,6 +814,16 @@ extension PetController: ReminderCenterDelegate {
                 playStickerTags(["happy"], loops: 2)
             case .diskFull:
                 playStickerTags(["work", "tired"], loops: 3)
+            case .morningGreet:
+                playStickerTags(["happy", "love"], loops: 2)
+            case .lunchTime:
+                playStickerTags(["eat", "happy"], loops: 2)
+            case .afternoonCoffee:
+                playStickerTags(["tired", "lazy"], loops: 2)
+            case .fridayEvening:
+                playStickerTags(["happy", "exercise"], loops: 3)
+            case .ideOvertime:
+                playStickerTags(["exercise", "tired"], loops: 3)
             }
             return
         }
@@ -741,6 +856,16 @@ extension PetController: ReminderCenterDelegate {
             playOnce(.waving, loops: 2)
         case .diskFull:
             playOnce(.review, loops: 3)
+        case .morningGreet:
+            playOnce(.waving, loops: 2)
+        case .lunchTime:
+            playOnce(.waiting, loops: 2)
+        case .afternoonCoffee:
+            playOnce(.review, loops: 2)
+        case .fridayEvening:
+            playOnce(.jumping, loops: 2)
+        case .ideOvertime:
+            playOnce(.jumping, loops: 3)
         }
     }
 
