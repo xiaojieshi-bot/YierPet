@@ -407,7 +407,6 @@ final class PetController: NSObject {
     private func finishThrow() {
         stopThrow()
         if maxImpactSpeed > 1600 {
-            say("请轻拿轻放一二大王！", duration: 3)
             if style.isSticker {
                 playStickerTags(["angry", "sad"], loops: 2)
             } else {
@@ -750,9 +749,7 @@ extension PetController: ReminderCenterDelegate {
     }
 
     func reminderCenter(_ center: ReminderCenter, sleepyChanged sleepy: Bool) {
+        // Only reminders speak; entering night mode just slows the idle pace.
         self.sleepy = sleepy
-        if sleepy {
-            say("夜深了……我先眨一会儿眼睛 zzZ", duration: 5)
-        }
     }
 }
