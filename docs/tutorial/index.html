@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YierPet 一二桌宠 · 安装与使用教程</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --paper: #fffdf8;
+      --ink: #1c1917;
+      --muted: #57534e;
+      --accent: #e85d04;
+      --accent-soft: #fff4e6;
+      --border: #e7e5e4;
+      --code-bg: #292524;
+      --radius: 12px;
+      --font: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+      --mono: "SF Mono", "Menlo", "Consolas", monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 16px;
+    }
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    header {
+      background: linear-gradient(135deg, #fff 0%, var(--accent-soft) 100%);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 4px);
+      padding: 2rem 2rem 1.75rem;
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.85rem;
+      letter-spacing: -0.02em;
+    }
+    header .tagline {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    header .meta {
+      margin-top: 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+    header a { color: var(--accent); }
+    nav.toc {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2rem;
+    }
+    nav.toc h2 {
+      margin: 0 0 0.75rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    nav.toc ol {
+      margin: 0;
+      padding-left: 1.25rem;
+    }
+    nav.toc li { margin: 0.35rem 0; }
+    nav.toc a { color: var(--ink); text-decoration: none; }
+    nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+    section {
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+    section h2 {
+      margin: 0 0 1rem;
+      font-size: 1.35rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent-soft);
+    }
+    section h3 {
+      margin: 1.5rem 0 0.65rem;
+      font-size: 1.05rem;
+    }
+    p { margin: 0.75rem 0; }
+    ul, ol { margin: 0.5rem 0; padding-left: 1.35rem; }
+    li { margin: 0.35rem 0; }
+    .note {
+      background: var(--accent-soft);
+      border-left: 4px solid var(--accent);
+      padding: 0.85rem 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    .warn {
+      background: #fef3c7;
+      border-left: 4px solid #d97706;
+      padding: 0.85rem 1rem;
+      border-radius: 0 var(--radius) var(--radius) 0;
+      margin: 1rem 0;
+      font-size: 0.95rem;
+    }
+    section.quickstart {
+      border-color: var(--accent);
+      border-width: 2px;
+      background: linear-gradient(180deg, #fff 0%, var(--accent-soft) 120%);
+    }
+    section.quickstart h2 { border-bottom-color: rgba(232, 93, 4, 0.25); }
+    .quickstart-steps {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: qs;
+    }
+    .quickstart-steps > li {
+      counter-increment: qs;
+      margin: 1rem 0;
+      padding-left: 2.5rem;
+      position: relative;
+    }
+    .quickstart-steps > li::before {
+      content: counter(qs);
+      position: absolute;
+      left: 0;
+      top: 0.1rem;
+      width: 1.65rem;
+      height: 1.65rem;
+      line-height: 1.65rem;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+    .quickstart-steps .step-title {
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+    }
+    .quickstart-after {
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--border);
+      font-size: 0.95rem;
+    }
+    .quickstart-after dl {
+      margin: 0.5rem 0 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.35rem 1rem;
+    }
+    .quickstart-after dt { font-weight: 600; color: var(--muted); }
+    .quickstart-after dd { margin: 0; }
+    pre {
+      background: var(--code-bg);
+      color: #fafaf9;
+      padding: 1rem 1.15rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin: 1rem 0;
+    }
+    code {
+      font-family: var(--mono);
+      font-size: 0.88em;
+      background: #f5f5f4;
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+    }
+    pre code { background: none; padding: 0; font-size: inherit; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #fafaf9; font-weight: 600; }
+    kbd {
+      display: inline-block;
+      padding: 0.15em 0.45em;
+      font-family: var(--mono);
+      font-size: 0.8em;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      box-shadow: 0 1px 0 #d6d3d1;
+    }
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+      margin-top: 2rem;
+    }
+    @media print {
+      body { background: #fff; }
+      section, header, nav.toc { break-inside: avoid; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>YierPet 一二桌宠</h1>
+      <p class="tagline">macOS 桌面上的「一二」——安装、运行与日常使用说明</p>
+      <div class="meta">
+        <span>仓库：<a href="https://github.com/xiaojieshi-bot/YierPet" target="_blank" rel="noopener">github.com/xiaojieshi-bot/YierPet</a></span>
+        <span>系统：macOS 13 及以上</span>
+        <span>构建：一条命令，无需完整 Xcode</span>
+      </div>
+    </header>
+
+    <section id="quickstart" class="quickstart">
+      <h2>0. 太长不看 · 直接怎么做</h2>
+      <p style="margin-top:0">Mac 上打开<strong>终端</strong>，按顺序做下面三步即可。</p>
+      <ol class="quickstart-steps">
+        <li>
+          <div class="step-title">（首次）装编译工具</div>
+          <p style="margin:0 0 0.5rem">若从没装过，先执行一次；已装过可跳过。</p>
+          <pre><code>xcode-select --install</code></pre>
+        </li>
+        <li>
+          <div class="step-title">下载并构建</div>
+          <p style="margin:0 0 0.5rem">整段复制粘贴到终端回车。</p>
+          <pre><code>git clone https://github.com/xiaojieshi-bot/YierPet.git
+cd YierPet
+./build.sh</code></pre>
+        </li>
+        <li>
+          <div class="step-title">启动桌宠</div>
+          <pre><code>open build/YierPet.app</code></pre>
+          <p style="margin:0.5rem 0 0">桌面上会出现「一二」。<strong>程序坞里没有图标是正常的。</strong></p>
+        </li>
+      </ol>
+      <div class="quickstart-after">
+        <strong>就这三步，已经能用了。</strong>日常只需记：
+        <dl>
+          <dt>玩</dt><dd>拖动移动 · 单击打招呼 · 快速甩动可抛着玩</dd>
+          <dt>设置</dt><dd>在宠物身上<strong>右键</strong>（换形象、关提醒等）</dd>
+          <dt>退出</dt><dd>右键 → <strong>退出</strong>（不要到程序坞找）</dd>
+        </dl>
+      </div>
+    </section>
+
+    <nav class="toc" aria-label="目录">
+      <h2>目录</h2>
+      <ol>
+        <li><a href="#quickstart">太长不看 · 三步上手</a></li>
+        <li><a href="#intro">这是什么</a></li>
+        <li><a href="#requirements">开始之前</a></li>
+        <li><a href="#install">安装与首次启动</a></li>
+        <li><a href="#gatekeeper">无法打开？（Gatekeeper）</a></li>
+        <li><a href="#login-item">开机自启</a></li>
+        <li><a href="#basics">基本操作</a></li>
+        <li><a href="#menu">右键菜单</a></li>
+        <li><a href="#reminders">提醒与哨兵</a></li>
+        <li><a href="#companion">陪伴模式</a></li>
+        <li><a href="#styles">四种形象</a></li>
+        <li><a href="#faq">常见问题</a></li>
+        <li><a href="#quit">如何退出</a></li>
+      </ol>
+    </nav>
+
+    <section id="intro">
+      <h2>1. 这是什么</h2>
+      <p>
+        <strong>YierPet（一二桌宠）</strong>是一只住在 macOS 桌面上的透明悬浮小宠物。
+        它会自己散步、跳跃、挥手；可以拖拽和「甩出去」玩物理抛掷；
+        还会在合适的时候用头顶气泡提醒你喝水、起身、别熬夜，并在 CPU 飙高时「红温」。
+      </p>
+      <p>
+        应用以<strong>无 Dock 图标</strong>的方式运行（不占程序坞位置），
+        也<strong>不需要</strong>辅助功能、屏幕录制等敏感权限。
+      </p>
+    </section>
+
+    <section id="requirements">
+      <h2>2. 开始之前</h2>
+      <ul>
+        <li><strong>操作系统</strong>：macOS 13（Ventura）或更高版本。</li>
+        <li><strong>命令行工具</strong>：需要已安装 Xcode Command Line Tools（用于编译 Swift）。</li>
+      </ul>
+      <p>若尚未安装，打开「终端」，执行：</p>
+      <pre><code>xcode-select --install</code></pre>
+      <p>在弹窗中按提示安装，通常几分钟即可完成。</p>
+      <div class="note">
+        <strong>不需要</strong>从 App Store 安装完整版 Xcode，也<strong>没有</strong>第三方依赖包。
+      </div>
+    </section>
+
+    <section id="install">
+      <h2>3. 安装与首次启动</h2>
+      <p>在终端中依次执行以下命令（可复制粘贴）：</p>
+      <pre><code>git clone https://github.com/xiaojieshi-bot/YierPet.git
+cd YierPet
+./build.sh
+open build/YierPet.app</code></pre>
+      <h3>各步说明</h3>
+      <ol>
+        <li><code>git clone …</code> — 从 GitHub 下载项目源码。</li>
+        <li><code>cd YierPet</code> — 进入项目目录。</li>
+        <li><code>./build.sh</code> — 编译并生成 <code>build/YierPet.app</code>。</li>
+        <li><code>open build/YierPet.app</code> — 启动桌宠。</li>
+      </ol>
+      <p>成功后，桌面上会出现「一二」，并开始随机走动。程序坞里<strong>不会</strong>出现图标，这是正常现象。</p>
+    </section>
+
+    <section id="gatekeeper">
+      <h2>4. 无法打开？（Gatekeeper）</h2>
+      <p>若你使用的是<strong>别人打包好的 .app</strong>（不是在本机执行 <code>./build.sh</code> 构建的），macOS 可能提示「无法打开」或「来自身份不明的开发者」。</p>
+      <p><strong>解决办法</strong>：</p>
+      <ol>
+        <li>在 Finder 中找到 <code>YierPet.app</code>；</li>
+        <li><strong>按住 Control 键并点击</strong>（或右键）应用图标；</li>
+        <li>选择「打开」；</li>
+        <li>在对话框中再次点「打开」。</li>
+      </ol>
+      <div class="note">
+        在本仓库目录下自行 <code>./build.sh</code> 构建的应用，一般不会出现此问题。
+      </div>
+    </section>
+
+    <section id="login-item">
+      <h2>5. 开机自启（可选）</h2>
+      <ol>
+        <li>打开「系统设置」→「通用」→「登录项」（或「登录时打开的项目」）；</li>
+        <li>点击「+」或「添加」；</li>
+        <li>选中你构建好的 <code>build/YierPet.app</code>（建议放在固定位置，例如「应用程序」文件夹）；</li>
+        <li>确认添加。</li>
+      </ol>
+      <p>下次登录 macOS 后，一二会自动出现在桌面。</p>
+    </section>
+
+    <section id="basics">
+      <h2>6. 基本操作</h2>
+      <table>
+        <thead>
+          <tr><th>操作</th><th>效果</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>按住并拖动</td><td>带着宠物移动；拖动时会播放跑步动画</td></tr>
+          <tr><td>快速甩动后松手</td><td>抛掷：抛物线飞行、撞墙与落地反弹；摔得狠会生气</td></tr>
+          <tr><td>单击</td><td>打招呼（经典版挥手；表情包版为开心/比心）</td></tr>
+          <tr><td>右键点击宠物</td><td>打开设置菜单（见下一节）</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="menu">
+      <h2>7. 右键菜单</h2>
+      <p>在宠物身上<strong>右键</strong>，可看到：</p>
+      <ul>
+        <li><strong>形象</strong> — 切换四种外观（选择会自动保存）；</li>
+        <li><strong>动作</strong> — 仅「经典一二」可用，手动切换 9 种图集动作；</li>
+        <li><strong>暂停随机行为 / 开启随机行为</strong> — 控制是否自动散步、跳跃等；</li>
+        <li><strong>提醒设置</strong> — 久坐、喝水、深夜、摸鱼检测的开关；</li>
+        <li><strong>系统哨兵</strong> — CPU、内存、电量、磁盘等系统提醒开关；</li>
+        <li><strong>陪伴模式</strong> — 早晨问候、午饭、下午茶、周五、编码久战等节律提醒；</li>
+        <li><strong>退出</strong> — 关闭应用（快捷键菜单项为 Q）。</li>
+      </ul>
+      <div class="note">
+        <strong>隐藏功能</strong>：按住 <kbd>Option</kbd> 再右键，会出现「测试提醒」子菜单，可立即触发各类提醒，方便演示或检查效果。
+      </div>
+    </section>
+
+    <section id="reminders">
+      <h2>8. 健康提醒与系统哨兵（概要）</h2>
+      <h3>健康提醒</h3>
+      <table>
+        <thead>
+          <tr><th>类型</th><th>大致触发条件</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>久坐提醒</td><td>连续在电脑前活跃约 1 小时（离开 5 分钟会清零）</td></tr>
+          <tr><td>喝水提醒</td><td>约每 30 分钟（人不在时不计时）</td></tr>
+          <tr><td>深夜关怀</td><td>23 点后进入「睡意」；若仍在工作，约每 30 分钟关怀一次</td></tr>
+          <tr><td>摸鱼检测</td><td>视频类 App 连续前台约 30 分钟（B 站、腾讯视频、IINA 等）</td></tr>
+        </tbody>
+      </table>
+      <h3>系统哨兵</h3>
+      <p>平时不打扰，仅在异常时冒气泡，例如 CPU 持续偏高、内存压力 critical、低电量、磁盘空间不足等。CPU 红温时经典版会逐渐变红；「活力一二」表情包有全身着火动画。</p>
+      <p>任意两类提醒之间有约 <strong>90 秒</strong> 的全局间隔，避免连环刷屏。各项均可在菜单中单独关闭。</p>
+    </section>
+
+    <section id="companion">
+      <h2>9. 陪伴模式</h2>
+      <p>按一天中的节奏主动问候，适合想要「有人在旁边」的感觉：</p>
+      <table>
+        <thead>
+          <tr><th>项目</th><th>触发说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>早晨问候</td><td>6–10 点且在电脑前，每天一次</td></tr>
+          <tr><td>午饭提醒</td><td>12 点且在电脑前，每天一次</td></tr>
+          <tr><td>下午咖啡</td><td>15 点且在电脑前，每天一次</td></tr>
+          <tr><td>周五撒欢</td><td>周五 17–19 点且在电脑前，每周一次</td></tr>
+          <tr><td>编码久战</td><td>在 Xcode / VS Code / JetBrains 等 IDE 中连续约 2 小时</td></tr>
+        </tbody>
+      </table>
+      <p>在「陪伴模式」子菜单中可逐项开关。</p>
+    </section>
+
+    <section id="styles">
+      <h2>10. 四种形象</h2>
+      <table>
+        <thead>
+          <tr><th>菜单名称</th><th>说明</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>经典一二</td><td>精灵图集，9 种动作可在菜单中手动切换</td></tr>
+          <tr><td>活力一二</td><td>一二表情包帧动画，含 CPU 红温着火等</td></tr>
+          <tr><td>活力布布</td><td>布布表情包</td></tr>
+          <tr><td>一二布布</td><td>一二与布布同框合体表情包</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="faq">
+      <h2>11. 常见问题</h2>
+      <h3>程序坞里找不到 YierPet？</h3>
+      <p>设计如此。请右键宠物 →「退出」来关闭应用。</p>
+      <h3>需要授权辅助功能或屏幕录制吗？</h3>
+      <p>不需要。活跃与前台 App 检测使用系统公开 API。</p>
+      <h3>摸鱼检测认不出我用的播放器？</h3>
+      <p>可在源码 <code>ActivityMonitor.swift</code> 的 <code>slackBundleIDs</code> 中加入该 App 的 Bundle ID。终端查询示例：</p>
+      <pre><code>osascript -e 'id of app "应用名称"'</code></pre>
+      <h3>想改台词或提醒间隔？</h3>
+      <p>文案与阈值在 <code>ReminderCenter.swift</code>；手感参数在 <code>PetController.swift</code>。修改后重新执行 <code>./build.sh</code> 即可。</p>
+    </section>
+
+    <section id="quit">
+      <h2>12. 如何退出</h2>
+      <p>右键点击桌面上的宠物 → 选择<strong>退出</strong>。</p>
+      <div class="warn">
+        不要指望从程序坞或「强制退出」列表里找图标——本应用故意不显示在 Dock 中。
+      </div>
+    </section>
+
+    <footer>
+      <p>YierPet · MIT License · <a href="https://github.com/xiaojieshi-bot/YierPet">GitHub</a></p>
+    </footer>
+  </div>
+</body>
+</html>
