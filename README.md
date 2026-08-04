@@ -4,6 +4,8 @@
 
 纯 Swift + AppKit 原生实现，**零依赖、零权限、一条命令构建**。
 
+仓库：[gitee.com/cat_10/YierPet](https://gitee.com/cat_10/YierPet) · 图文教程：[docs/tutorial/index.html](docs/tutorial/index.html)
+
 ![动作总览](docs/contact-sheet.png)
 
 ## 功能特性
@@ -92,22 +94,46 @@
 | 周五撒欢 | 周五 17～19 点且在电脑前 | 每周最多一次 |
 | 编码久战 | Xcode / VS Code / JetBrains 等 IDE 连续前台满 2 小时 | 鼓励起身休息 |
 
-## 安装运行
+## 安装（Gitee · 两种方式）
 
-**环境要求**：macOS 13+，安装过 Xcode Command Line Tools（没有的话终端执行 `xcode-select --install`，几分钟装完）。
+**环境要求**：macOS 13（Ventura）或更高版本。
+
+### 方法一：Release 压缩包（推荐）
+
+不用 Git，不用编译，**解压后打开即可**。
+
+1. 打开 [Gitee Releases](https://gitee.com/cat_10/YierPet/releases)
+2. 下载 **YierPet-mac.zip**
+3. 解压到任意文件夹（建议拖到「应用程序」），双击 **YierPet.app**
+
+若 macOS 提示「无法打开」或「来自身份不明的开发者」：**右键（或 Control+点按）YierPet.app → 打开 → 再点「打开」**。
+
+> **开机自启**：把 `YierPet.app` 添加到 系统设置 → 通用 → 登录项。
+
+### 方法二：克隆源码自己编译
+
+适合开发者或 Release 尚未更新时。需要先安装 **Xcode Command Line Tools**（不是完整 Xcode）：
 
 ```bash
-git clone https://github.com/xiaojieshi-bot/YierPet.git
+xcode-select --install
+```
+
+```bash
+git clone https://gitee.com/cat_10/YierPet.git
 cd YierPet
 ./build.sh
 open build/YierPet.app
 ```
 
+国内若 GitHub 较慢，也可从 GitHub 镜像克隆：
+
+```bash
+git clone https://gh-proxy.com/https://github.com/xiaojieshi-bot/YierPet.git
+```
+
 不需要完整 Xcode，不需要任何第三方依赖。
 
 📖 **图文教程**（适合录视频时对照）：[`docs/tutorial/index.html`](docs/tutorial/index.html)（本地可用 `open docs/tutorial/index.html` 打开）。录制分镜见 [`docs/VIDEO_RECORDING_SCRIPT.md`](docs/VIDEO_RECORDING_SCRIPT.md)。
-
-> 开机自启：把 `build/YierPet.app` 添加到 系统设置 → 通用 → 登录项。
 
 ## 使用说明
 

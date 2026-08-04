@@ -226,15 +226,37 @@
       <h1>YierPet 一二桌宠</h1>
       <p class="tagline">macOS 桌面上的「一二」——安装、运行与日常使用说明</p>
       <div class="meta">
-        <span>仓库：<a href="https://github.com/xiaojieshi-bot/YierPet" target="_blank" rel="noopener">github.com/xiaojieshi-bot/YierPet</a></span>
+        <span>仓库：<a href="https://gitee.com/cat_10/YierPet" target="_blank" rel="noopener">gitee.com/cat_10/YierPet</a></span>
         <span>系统：macOS 13 及以上</span>
-        <span>构建：一条命令，无需完整 Xcode</span>
+        <span>推荐：Release 压缩包，解压即用</span>
       </div>
     </header>
 
     <section id="quickstart" class="quickstart">
-      <h2>0. 太长不看 · 直接怎么做</h2>
-      <p style="margin-top:0">Mac 上打开<strong>终端</strong>，按顺序做下面三步即可。</p>
+      <h2>0. 太长不看 · 两种安装方式</h2>
+
+      <h3 style="margin-top:0">方法一：下载 Release 压缩包（推荐）</h3>
+      <p>不用装 Git，不用编译，<strong>解压后打开即可</strong>。</p>
+      <ol class="quickstart-steps">
+        <li>
+          <div class="step-title">打开 Release 页面</div>
+          <p style="margin:0"><a href="https://gitee.com/cat_10/YierPet/releases" target="_blank" rel="noopener">gitee.com/cat_10/YierPet/releases</a></p>
+        </li>
+        <li>
+          <div class="step-title">下载安装包</div>
+          <p style="margin:0">下载最新版 <code>YierPet-mac.zip</code>。</p>
+        </li>
+        <li>
+          <div class="step-title">解压并运行</div>
+          <p style="margin:0">解压到任意文件夹（建议拖到「应用程序」），双击 <code>YierPet.app</code>。桌面上会出现「一二」。</p>
+        </li>
+      </ol>
+      <div class="note" style="margin-top:0.75rem">
+        若 macOS 提示「无法打开」或「来自身份不明的开发者」：在 Finder 中<strong>右键（或 Control+点按）YierPet.app → 打开 → 再点「打开」</strong>。详见<a href="#gatekeeper">Gatekeeper 说明</a>。
+      </div>
+
+      <h3 style="margin-top:1.75rem">方法二：Gitee 克隆源码自己编译</h3>
+      <p>适合开发者或 Release 尚未更新时。需要先安装 <strong>Xcode Command Line Tools</strong>（不是完整 Xcode）：</p>
       <ol class="quickstart-steps">
         <li>
           <div class="step-title">（首次）装编译工具</div>
@@ -242,20 +264,22 @@
           <pre><code>xcode-select --install</code></pre>
         </li>
         <li>
-          <div class="step-title">下载并构建</div>
+          <div class="step-title">克隆并构建</div>
           <p style="margin:0 0 0.5rem">整段复制粘贴到终端回车。</p>
-          <pre><code>git clone https://github.com/xiaojieshi-bot/YierPet.git
+          <pre><code>git clone https://gitee.com/cat_10/YierPet.git
 cd YierPet
 ./build.sh</code></pre>
         </li>
         <li>
           <div class="step-title">启动桌宠</div>
           <pre><code>open build/YierPet.app</code></pre>
-          <p style="margin:0.5rem 0 0">桌面上会出现「一二」。<strong>程序坞里没有图标是正常的。</strong></p>
+          <p style="margin:0.5rem 0 0"><strong>程序坞里没有图标是正常的。</strong></p>
         </li>
       </ol>
+      <p style="margin:0.75rem 0 0;font-size:0.92rem;color:var(--muted)">国内若 GitHub 较慢，也可镜像克隆：<code>git clone https://gh-proxy.com/https://github.com/xiaojieshi-bot/YierPet.git</code></p>
+
       <div class="quickstart-after">
-        <strong>就这三步，已经能用了。</strong>日常只需记：
+        <strong>日常只需记：</strong>
         <dl>
           <dt>玩</dt><dd>拖动移动 · 单击打招呼 · 快速甩动可抛着玩</dd>
           <dt>设置</dt><dd>在宠物身上<strong>右键</strong>（换形象、关提醒等）</dd>
@@ -267,10 +291,10 @@ cd YierPet
     <nav class="toc" aria-label="目录">
       <h2>目录</h2>
       <ol>
-        <li><a href="#quickstart">太长不看 · 三步上手</a></li>
+        <li><a href="#quickstart">太长不看 · 两种安装方式</a></li>
+        <li><a href="#release">方法一：Release 压缩包</a></li>
+        <li><a href="#source">方法二：克隆源码编译</a></li>
         <li><a href="#intro">这是什么</a></li>
-        <li><a href="#requirements">开始之前</a></li>
-        <li><a href="#install">安装与首次启动</a></li>
         <li><a href="#gatekeeper">无法打开？（Gatekeeper）</a></li>
         <li><a href="#login-item">开机自启</a></li>
         <li><a href="#basics">基本操作</a></li>
@@ -283,8 +307,54 @@ cd YierPet
       </ol>
     </nav>
 
+    <section id="release">
+      <h2>1. 方法一：Release 压缩包（详细）</h2>
+      <ol>
+        <li>打开 <a href="https://gitee.com/cat_10/YierPet/releases" target="_blank" rel="noopener">Gitee Releases</a>；</li>
+        <li>下载 <code>YierPet-mac.zip</code>；</li>
+        <li>双击 zip 解压（或右键 →「解压缩」）；</li>
+        <li>将 <code>YierPet.app</code> 拖到「应用程序」或任意固定位置；</li>
+        <li>双击 <code>YierPet.app</code> 启动。</li>
+      </ol>
+      <div class="note">
+        Release 包<strong>不需要</strong>安装 Xcode、Git 或任何第三方依赖，解压即可使用。
+      </div>
+      <p>若首次打开被 macOS 拦截，请按下一节 <a href="#gatekeeper">Gatekeeper</a> 操作「右键 → 打开」。</p>
+    </section>
+
+    <section id="source">
+      <h2>2. 方法二：克隆源码编译（详细）</h2>
+      <h3>开始之前</h3>
+      <ul>
+        <li><strong>操作系统</strong>：macOS 13（Ventura）或更高版本。</li>
+        <li><strong>编译</strong>：需要 Xcode Command Line Tools（终端执行 <code>xcode-select --install</code>）。</li>
+        <li><strong>Git</strong>：用于 <code>git clone</code>。</li>
+      </ul>
+      <div class="note">
+        <strong>不需要</strong>从 App Store 安装完整版 Xcode，也<strong>没有</strong>第三方依赖包。
+      </div>
+      <h3>步骤</h3>
+      <pre><code>git clone https://gitee.com/cat_10/YierPet.git
+cd YierPet
+./build.sh
+open build/YierPet.app</code></pre>
+      <p>国内若 GitHub 较慢，可使用镜像：</p>
+      <pre><code>git clone https://gh-proxy.com/https://github.com/xiaojieshi-bot/YierPet.git</code></pre>
+      <table>
+        <thead>
+          <tr><th>命令</th><th>作用</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>git clone …</code></td><td>从 Gitee 下载项目源码</td></tr>
+          <tr><td><code>./build.sh</code></td><td>编译并生成 <code>build/YierPet.app</code></td></tr>
+          <tr><td><code>open build/YierPet.app</code></td><td>启动桌宠</td></tr>
+        </tbody>
+      </table>
+      <p>在本机自行构建的应用，一般不会出现 Gatekeeper 拦截。成功后桌面上会出现「一二」，程序坞里<strong>不会</strong>出现图标，这是正常现象。</p>
+    </section>
+
     <section id="intro">
-      <h2>1. 这是什么</h2>
+      <h2>3. 这是什么</h2>
       <p>
         <strong>YierPet（一二桌宠）</strong>是一只住在 macOS 桌面上的透明悬浮小宠物。
         它会自己散步、跳跃、挥手；可以拖拽和「甩出去」玩物理抛掷；
@@ -296,40 +366,9 @@ cd YierPet
       </p>
     </section>
 
-    <section id="requirements">
-      <h2>2. 开始之前</h2>
-      <ul>
-        <li><strong>操作系统</strong>：macOS 13（Ventura）或更高版本。</li>
-        <li><strong>命令行工具</strong>：需要已安装 Xcode Command Line Tools（用于编译 Swift）。</li>
-      </ul>
-      <p>若尚未安装，打开「终端」，执行：</p>
-      <pre><code>xcode-select --install</code></pre>
-      <p>在弹窗中按提示安装，通常几分钟即可完成。</p>
-      <div class="note">
-        <strong>不需要</strong>从 App Store 安装完整版 Xcode，也<strong>没有</strong>第三方依赖包。
-      </div>
-    </section>
-
-    <section id="install">
-      <h2>3. 安装与首次启动</h2>
-      <p>在终端中依次执行以下命令（可复制粘贴）：</p>
-      <pre><code>git clone https://github.com/xiaojieshi-bot/YierPet.git
-cd YierPet
-./build.sh
-open build/YierPet.app</code></pre>
-      <h3>各步说明</h3>
-      <ol>
-        <li><code>git clone …</code> — 从 GitHub 下载项目源码。</li>
-        <li><code>cd YierPet</code> — 进入项目目录。</li>
-        <li><code>./build.sh</code> — 编译并生成 <code>build/YierPet.app</code>。</li>
-        <li><code>open build/YierPet.app</code> — 启动桌宠。</li>
-      </ol>
-      <p>成功后，桌面上会出现「一二」，并开始随机走动。程序坞里<strong>不会</strong>出现图标，这是正常现象。</p>
-    </section>
-
     <section id="gatekeeper">
       <h2>4. 无法打开？（Gatekeeper）</h2>
-      <p>若你使用的是<strong>别人打包好的 .app</strong>（不是在本机执行 <code>./build.sh</code> 构建的），macOS 可能提示「无法打开」或「来自身份不明的开发者」。</p>
+      <p>若你使用的是<strong>Release 压缩包</strong>或别人打包好的 <code>.app</code>（不是在本机执行 <code>./build.sh</code> 构建的），macOS 可能提示「无法打开」或「来自身份不明的开发者」。</p>
       <p><strong>解决办法</strong>：</p>
       <ol>
         <li>在 Finder 中找到 <code>YierPet.app</code>；</li>
@@ -347,7 +386,7 @@ open build/YierPet.app</code></pre>
       <ol>
         <li>打开「系统设置」→「通用」→「登录项」（或「登录时打开的项目」）；</li>
         <li>点击「+」或「添加」；</li>
-        <li>选中你构建好的 <code>build/YierPet.app</code>（建议放在固定位置，例如「应用程序」文件夹）；</li>
+        <li>选中 <code>YierPet.app</code>（Release 解压版或 <code>build/YierPet.app</code>；建议放在「应用程序」等固定位置）；</li>
         <li>确认添加。</li>
       </ol>
       <p>下次登录 macOS 后，一二会自动出现在桌面。</p>
@@ -459,7 +498,7 @@ open build/YierPet.app</code></pre>
     </section>
 
     <footer>
-      <p>YierPet · MIT License · <a href="https://github.com/xiaojieshi-bot/YierPet">GitHub</a></p>
+      <p>YierPet · MIT License · <a href="https://gitee.com/cat_10/YierPet">Gitee</a> · <a href="https://github.com/xiaojieshi-bot/YierPet">GitHub</a></p>
     </footer>
   </div>
 </body>
